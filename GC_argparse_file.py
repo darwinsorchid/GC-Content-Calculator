@@ -1,5 +1,6 @@
 # ===================================================== DEPENDENCIES ==============================================================
 import argparse
+import sys
 from Bio import SeqIO
 from Bio import Align
 from Bio.SeqUtils import gc_fraction
@@ -8,7 +9,7 @@ plt.style.use('seaborn-v0_8')
 
 # ===================================================== ARGPARSE SETUP =============================================================
 # Create parser instance
-parser = argparse.ArgumentParser(description = 'Calculate GC content of DNA/RNA sequences from files.')
+parser = argparse.ArgumentParser(description = 'Calculate GC content of DNA/RNA sequences from files of different formats.')
 
 # ----------------------------- Single sequence file formats as optional arguments ------------------------------
 # FASTA nucleic acid files
@@ -28,22 +29,26 @@ parser.add_argument('-fa', type = argparse.FileType('r', encoding = 'UTF-8'), he
 # ClustalW files
 parser.add_argument('-aln', type = argparse.FileType('r', encoding = 'UTF-8'), help = 'Provide .aln file')
 
-
 # Parse command-line arguments that were passed to the script and store them as attributes to args object
 args = parser.parse_args()
 
-if args.fna is not None:
-    record_list =[SeqIO.read(file, "fasta") for file in args.fna]
-    sequence_list = [record.seq for record in record_list]
-    accession_num_list = [record.id.split('|')[3] for record in record_list]
+# Check if no files were provided
+if not any([args.fna, args.fasta, args.gb, args.fa, args.aln]):
+    print("Provide a file to continue")
+    sys.exit(1)  # Exit the script with a status of 1 (indicating an error)
+
+elif args.fna is not None:
+    record_list =[SeqIO.read(file, "fasta") for file in args.fna]            # Make list of SeqRecord objects from file
+    sequence_list = [record.seq for record in record_list]                   # Make list of sequences as Seq objects
+    accession_num_list = [record.id.split('|')[3] for record in record_list] # Make list of accession numbers of sequences
 
 elif args.fasta is not None:
-    record_list =[SeqIO.read(file, "fasta") for file in args.fasta]
-    sequence_list = [record.seq for record in record_list]
-    accession_num_list = [record.id for record in record_list]
+    record_list =[SeqIO.read(file, "fasta") for file in args.fasta]          
+    sequence_list = [record.seq for record in record_list]                   
+    accession_num_list = [record.id for record in record_list]               
 
 elif args.gb is not None:
-    record_list =[SeqIO.read(file, "genbank") for file in args.gb]
+    record_list =[SeqIO.read(file, "genbank") for file in args.gb]          
     sequence_list = [record.seq for record in record_list]
     accession_num_list = [record.id for record in record_list]
 
@@ -51,7 +56,7 @@ elif args.fa is not None:
     alignment = Align.read(args.fa, 'fasta')
     record_list = alignment.sequences
     sequence_list = [record.seq for record in record_list]
-    accession_num_list = [record.id for record in record_list]
+    accession_num_list = [record.id for record in record_list]     # Species name instead of accession number for aligned FASTA files
 
 elif args.aln is not None:
     alignment = Align.read(args.aln, 'clustal')
@@ -68,8 +73,9 @@ def calc_gc(sequence_list):
         gc_list.append(round(gc_fraction(i), 2))
     return gc_list
 
+
 def create_GC_barplot(accession_num_list, gc_list):
-    '''Function that creates barplot of the GC value calculated (not with SWAN) of multiple sequences.
+    '''Function that creates barplot of the GC value calculated of multiple sequences without sliding window analysis.
     '''
     fig, ax = plt.subplots()
 
@@ -98,5 +104,8 @@ def create_GC_barplot(accession_num_list, gc_list):
     plt.show()
 
 
+# Calculate GC content of sequences from file
 gc_content_list = calc_gc(sequence_list)
+
+# Create barplot of GC content
 create_GC_barplot(accession_num_list, gc_content_list)
