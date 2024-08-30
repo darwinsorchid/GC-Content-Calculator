@@ -4,7 +4,6 @@ from Bio.SeqUtils import gc_fraction
 from matplotlib import pyplot as plt
 plt.style.use('ggplot')
 
-
 # ===================================================== FUNCTIONS =================================================================
 def calculate_gc(sequence):
     ''' Simple function that calculates GC content of a single sequence and rounds the floating point number to the third decimal place.
@@ -29,7 +28,7 @@ def multiple_gc(seq_choice):
 def calculate_window_gc(sequence, window, step):
     '''Function that calculates the GC content of a single sequence with the sliding window method. The window and step size are passed in
     as positional arguments and the user defines their values accordingly. Returns a tuple of a list of the windows the sequence has been 
-    split to and a list with the respective gc values of every window analyzed.
+    split to and a list with the respective GC values of every window analyzed.
 
         [Sliding window analysis (SWAN) is a commonly used method for studying the properties of molecular sequences:
         data are plotted as moving averages of a particular criterion, such as the number of nucleotide changes,
@@ -48,7 +47,7 @@ def calculate_window_gc(sequence, window, step):
 
 
 def create_window_plot(sequence):
-    '''Function that takes plots the SWAN calculated content of a single sequence passed in by the user.
+    '''Function that plots the SWAN calculated content of a single sequence passed in by the user.
     '''
     x_axis, y_axis = calculate_window_gc(sequence, window_size, step_size)
     plt.plot(x_axis, y_axis, color = "k", linestyle = "--", marker = "o", label = f"{sequence}")
@@ -93,7 +92,7 @@ def create_GC_barplot(x, y):
     fig.tight_layout()
     plt.show()
 
-    
+
 # ====================================================== LOGIC =====================================================================
 print("Welcome to GC calculator!")
 seq_choice = int(input("Please enter the number of the sequences you want to analyze today. "))
